@@ -71,11 +71,12 @@ class Snake:
         self.Set_snakeX(NextCell.Get_snakepervX())
         self.Set_snakeY(NextCell.Get_snakepervY())
         self.Set_picture(NextCell.Get_picture())
-        G.Set_Board_mat(self.Get_snakeX(), self.Get_snakeY(), 1)
+        G.Set_Board_mat(self.Get_snakepervY(), self.Get_snakepervX(), 0)
+        G.Set_Board_mat(self.Get_snakeY(), self.Get_snakeX(), 1)
 
     
     def Draw_Cell(self, screen: pygame.Surface):
-        screen.blit(self.picture,((self.Get_snakeX() + 1)*31,(self.Get_snakeY()+66)*31))
+        screen.blit(self.picture,((self.Get_snakeX())*31+1,(self.Get_snakeY()*31)+66))
 
     def Change_pos(self,change, G: Global.Global, keypressed, GM):
         self.Set_snakepervX(self.Get_snakeX())
@@ -86,7 +87,7 @@ class Snake:
             self.Set_snakeY(self.Get_snakeY() - self.snake_dy)
             GM.Set_LastkeyPressed(change)
 
-        elif(change == 2 and keypressed != 0 and keypressed != 4):
+        elif(change == 2 and keypressed != 4):
             self.Set_snakeX(self.Get_snakeX() - self.snake_dx)
             GM.Set_LastkeyPressed(change)
 
@@ -98,7 +99,8 @@ class Snake:
             self.Set_snakeX(self.Get_snakeX() + self.snake_dx)
             GM.Set_LastkeyPressed(change)
         
-        G.Set_Board_mat(self.Get_snakeX(), self.Get_snakeY(), 3)
+        G.Set_Board_mat(self.Get_snakepervY(), self.Get_snakepervX(), 0)
+        G.Set_Board_mat(self.Get_snakeY(), self.Get_snakeX(), 3)
     
 
     

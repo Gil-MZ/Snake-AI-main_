@@ -42,15 +42,16 @@ class Game_Manager:
                 S_queue = self.G.Get_snakeCells()
                 Head = S_queue.popleft()
                 #Cheking if the player pressed W,A,S or D
-                if event.key == pygame.K_w:
-                    Head.Change_pos(1, self.G, self.LastKeypressed, self)
-                elif event.key == pygame.K_a:
-                    Head.Change_pos(2, self.G, self.LastKeypressed, self)
-                elif event.key == pygame.K_s:
-                    Head.Change_pos(3, self.G, self.LastKeypressed, self)
-                elif event.key == pygame.K_d:
-                    Head.Change_pos(4, self.G, self.LastKeypressed, self)
+                if event.key == pygame.K_w and self.LastKeypressed != 3:
+                    self.Set_LastkeyPressed(1)
+                elif event.key == pygame.K_a and self.LastKeypressed != 4:
+                    self.Set_LastkeyPressed(2)
+                elif event.key == pygame.K_s and self.LastKeypressed != 1:
+                    self.Set_LastkeyPressed(3)
+                elif event.key == pygame.K_d and self.LastKeypressed != 2:
+                    self.Set_LastkeyPressed(4)
                 S_queue.append(Head)
+                self.Update_Snake_pos()
 
     def Enter_snakeCell(self):
         #Adding another cell to the snake queue
@@ -62,14 +63,14 @@ class Game_Manager:
             Snake_cell = Snake.Snake(Snake_pic, self.G)
             Snake_cell.Set_snakeX(self.StartX)
             Snake_cell.Set_snakeY(self.StartY)
-            self.G.Set_Board_mat(self.StartX, self.StartY, 3)
+            self.G.Set_Board_mat(self.StartY, self.StartX, 3)
         #The rest of the body
         else:
             Cell = S_queue.pop()
             S_queue.appendleft(Cell)
             Snake_cell = Snake.Snake(Cell.Get_picture(),self.G)
             Snake_cell.Update_Cell(Cell, self.G)
-            self.G.Set_Board_mat(Snake_cell.Get_snakeX(), Snake_cell.Get_snakeY(), 1)
+            self.G.Set_Board_mat(Snake_cell.Get_snakeY(), Snake_cell.Get_snakeX(), 1)
         S_queue.appendleft(Snake_cell)
         self.G.Set_Snake_cells(S_queue)
         self.G.Update_SnakeLength()
@@ -82,7 +83,7 @@ class Game_Manager:
         board = self.G.Get_Board_mat()
         S_queue = self.G.Get_snakeCells()
         temp = deque()
-        Cell = NULL
+        Cell = Snake.Snake
         x, y = 0, 0
         for x in range (self.G.ROWS):
             for y in range (self.G.COLUMNS):
@@ -91,7 +92,6 @@ class Game_Manager:
                     temp.appendleft(Cell)
                     Cell.Draw_Cell(self.screen)
         self.G.Set_Snake_cells(temp)
-        print("1")
                     
     
     def Update_Snake_pos(self):
@@ -122,6 +122,10 @@ class Game_Manager:
         else:
             self.Apple.Draw_Apple(self.screen)
         self.Draw_Snake()
+        S_queue = self.G.Get_snakeCells()
+        Cell = S_queue.popleft()
+        S_queue.append(Cell)
+        Cell.Change_pos(self.LastKeypressed, self.G, self.LastKeypressed, self)
         print(self.G.Get_SnakeLength())
         self.GameScore.Draw_score(self.screen)
 

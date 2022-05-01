@@ -35,8 +35,8 @@ class Global:
     def Get_Board_mat(self):
         return self.Board_mat
 
-    def Set_Board_mat(self, x, y, num):
-        self.Board_mat[int(x)][int(y)] = num
+    def Set_Board_mat(self, y, x, num):
+        self.Board_mat[int(y)][int(x)] = num
             
 
     def Get_Width(self):
@@ -49,4 +49,4 @@ class Global:
         return self.Board_mat
 
     def Set_Snake_cells(self, S_Cells: deque):
-        self.Snake_Cells = S_Cells.copy()
+        self.Snake_Cells = S_Cells
