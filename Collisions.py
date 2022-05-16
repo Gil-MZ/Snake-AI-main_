@@ -1,19 +1,14 @@
-import Game_Manager as Game_M
-import Snake
+import Global_Var
 
 
 class Collisions:
 
     def __init__(self):
-        self.Xedge = 373
-        self.Yedge = 500
         pass
 
-    def Check_P(self,Snake_Head:Snake.Snake):
-        #Return True if the Player is out of bounds and False if not
-        if((Snake_Head.Get_snakeX())*31+1 < 0 or (Snake_Head.Get_snakeX())*31+1 > self.Xedge):
-            return True
-        elif((Snake_Head.Get_snakeY()*31)+66 < 66 or (Snake_Head.Get_snakeY()*31)+66 > self.Yedge):
+    def Check_Ai(self,X,Y,G:Global_Var.Global):
+        #Return True if the Ai is out of bounds or on himself and False if not
+        board = G.Get_Board_mat()
+        if X < 0 or X > 11 or Y < 0 or Y > 13 or board[Y][X] == 1:
             return True
         return False
-

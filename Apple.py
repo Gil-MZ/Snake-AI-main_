@@ -7,7 +7,7 @@ class Apple:
         self.AppleX = 0
         self.AppleY = 0
     
-    def Random_place(self, screen: pygame.Surface, G: Global.Global):
+    def Random_place(self, G: Global.Global):
         X = random.randint(0,11) 
         Y = random.randint(0,13) 
         Board = G.Get_Board_mat()
@@ -23,8 +23,6 @@ class Apple:
 
     def Apple_Exist(self, G: Global.Global):
         Board = G.Get_Board_mat()
-        for x in range(G.ROWS):
-            for y in range(G.COLUMNS):
-                if(Board[x][y] == 2):
-                    return True
+        if(Board[self.AppleY][self.AppleX] == 2):
+            return True
         return False

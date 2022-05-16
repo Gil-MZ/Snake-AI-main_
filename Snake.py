@@ -1,13 +1,12 @@
-from asyncio.windows_events import NULL
 import pygame, Global_Var as Global
-import Collisions
+import numpy, Collisions
 import Game_Manager as Game_M
 
 class Snake:    
     def __init__(self, picture):
         #Initializing snake variables
         self.picture = picture
-        self.prevPic = NULL
+        self.prevPic = None
         self.snake_X = 0
         self.snake_Y = 0
         self.snake_dx = 1
@@ -51,31 +50,27 @@ class Snake:
         screen.blit(self.picture,((self.Get_snakeX())*31+1,(self.Get_snakeY()*31)+66))
 
     
-    def Change_pos(self, G: Global.Global, keypressed, GM):
-        board = G.Get_Board_mat()
+    def Change_pos(self, G: Global.Global, Ai_move, GM):
         X,Y = self.Get_snakeX(),self.Get_snakeY()
-        if(keypressed == 3):
+        if(Ai_move == Game_M.Direction[1]):
             Y = Y + self.snake_dy
 
-        elif(keypressed == 4):
+        elif(Ai_move == Game_M.Direction[3]):
             X = X + self.snake_dx
 
-        elif(keypressed == 1):
+        elif(Ai_move == Game_M.Direction[0]):
             Y = Y - self.snake_dy
 
-        elif(keypressed == 2):
+        elif(Ai_move == Game_M.Direction[2]):
             X = X - self.snake_dx
 
-        if(X < 0 or X > 11 or Y < 0 or Y > 13 or board[Y][X] == 1):
+        C = Collisions.Collisions()
+        if(C.Check_Ai(X,Y,G)):
             GM.P_Lose()
             return False
         
         GM.Enter_snakeCell(X,Y,self.Get_picture())
 
-
-
-    def Is_Head(self):
-        return self.Head
     
 
     
