@@ -1,4 +1,5 @@
 from collections import deque as queue
+from Apple import Apple
 import Game_Manager as Game_M
 import numpy, random, math
  
@@ -67,7 +68,7 @@ if __name__ == '__main__':
 
 class Snkae_AI:
 
-    def __init__(self, pop_size, num_generations, num_trails, window_size, hidden_size, board_sizeX, board_sizeY, mutation_chance = 0.2, mutation_size = 0.02):
+    def __init__(self, pop_size, num_generations, num_trails, window_size, hidden_size, board_sizeX, board_sizeY, mutation_chance, mutation_size):
         self.pop_size = pop_size
         self.num_generations = num_generations
         self.num_trails = num_trails
@@ -152,7 +153,7 @@ class Snkae_AI:
             new_brain.append(new_layer)
         return new_brain
     
-    def one_generation(self):
+    def one_generation(self, apples):
         scores = [0 for _ in range(self.pop_size)]
         snake_length = [0 for _ in range(self.pop_size)]
         max_score = 0
@@ -161,8 +162,9 @@ class Snkae_AI:
             for j in range (self.num_trails):
                 self.current_brain = self.pop[i]
                 game = Game_M.Game_Manager()
-                outcome = game.Snake_Game(150, self)
+                outcome = game.Snake_Game(150, self,apples)
                 score = game.G.Get_SnakeLength()
+                apples.reset()
                 #frames = game.Frame_lived()
                 #score = pow(length-1,3)*(frames)
                 scores[i] += score
@@ -183,8 +185,10 @@ class Snkae_AI:
         self.pop = self.reproduce(top_25)
 
     def evolve_pop(self):
+        Ap = Apple()
+        Ap.Apples_Places()
         for i in range (self.num_generations):
-            self.one_generation()
+            self.one_generation(Ap)
             print("gen: ", i)
         
         key = input("Enter any key to end")

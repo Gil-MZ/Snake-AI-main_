@@ -28,8 +28,7 @@ class Game_Manager:
         self.snake_pic = "Snake_ai Pic\SnakeBodyRight.png"
         self.game_icon = "Snake_ai Pic\SnakeIcon.png"
         self.title = 'Snake AI'
-        self.Apple = Apple.Apple()
-        self.Apple.__init__()
+        self.Apple = None
         self.GameScore = Score.Score()
         self.GameScore.__init__()
         self.G = Global.Global()
@@ -40,25 +39,6 @@ class Game_Manager:
         self.frame_iteration = 0
         self.move_count = 0
         self.Ai = None
-    
-    def reset(self):
-        self.Apple = Apple.Apple()
-        self.Apple.__init__()
-        self.GameScore = Score.Score()
-        self.GameScore.__init__()
-        self.G = Global.Global()
-        self.G.__init__()
-        self.StartX = 3
-        self.StartY = 6
-        self.LastKeypressed = Direction[3]
-        self.Lose = False
-        self.Win = False 
-        self.Run = True
-        self.frame_iteration = 0
-        self.move_count = 0
-        self.Ai = None
-
-
 
     
     def CreateWIN(self):
@@ -105,7 +85,7 @@ class Game_Manager:
             self.G.Update_SnakeLength()
             if(self.Check_win()):
                 return
-            self.Apple.Random_place(self.G)
+            self.Apple.Get_apple(self.G)
         else:
             self.G.Remove_tail()
             #self.Apple.Draw_Apple(self.screen)
@@ -142,7 +122,8 @@ class Game_Manager:
     def Frame_lived(self):
         return self.frame_iteration
 
-    def Snake_Game(self, move_lim, AI):
+    def Snake_Game(self, move_lim, AI, Apples):
+        self.Apple = Apples
         self.Ai = AI
         #self.CreateWIN()
         self.Create_Snake()
