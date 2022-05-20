@@ -4,10 +4,8 @@ import Snake as S
 class Global:
     def __init__(self):
         #Variables:
-        self.WIDTH = 800
-        self.HEIGHT = 600
-        self.ROWS = 14
-        self.COLUMNS = 12
+        self.ROWS = 10
+        self.COLUMNS = 10
         self.Snake_Length = 2
         #self.Snake_Cells = deque()
         self.Snake_Cells = []
@@ -35,20 +33,14 @@ class Global:
 
     def Set_Board_mat(self, x, y, num):
         self.Board_mat[int(x)][int(y)] = num
-            
-    def Get_Width(self):
-        return self.WIDTH
-
-    def Get_Height(self):
-        return self.HEIGHT
 
     def Insert_Head(self, S_Cell):
         self.Snake_Cells.insert(0,S_Cell)
-        self.Set_Board_mat(S_Cell.Get_snakeY(),S_Cell.Get_snakeX(), 1)
+        self.Set_Board_mat(S_Cell.Get_snakeX(),S_Cell.Get_snakeY(), 1)
   
     def Remove_tail(self):
         S_Cell = self.Snake_Cells.pop()
-        self.Set_Board_mat(S_Cell.Get_snakeY(),S_Cell.Get_snakeX(), 0)
+        self.Set_Board_mat(S_Cell.Get_snakeX(),S_Cell.Get_snakeY(), 0)
     
     def Get_head(self):
         return self.Snake_Cells[0]

@@ -52,23 +52,49 @@ class Snake:
     
     def Change_pos(self, G: Global.Global, Ai_move, GM):
         X,Y = self.Get_snakeX(),self.Get_snakeY()
-        if(Ai_move == Game_M.Direction[1]):
+        G.Board_mat
+        last_mov = None
+        if(Ai_move == Game_M.Direction[1] and GM.LastKeypressed != 0):#DOWN
+            last_mov = 1
+            #print("DOWN\n")
             Y = Y + self.snake_dy
 
-        elif(Ai_move == Game_M.Direction[3]):
+        elif(Ai_move == Game_M.Direction[3] and GM.LastKeypressed != 2):#RIGHT
+            last_mov = 3
+            #print("RIGHT\n")
             X = X + self.snake_dx
 
-        elif(Ai_move == Game_M.Direction[0]):
+        elif(Ai_move == Game_M.Direction[0] and GM.LastKeypressed != 1):#UP
+            last_mov = 0
+            #print("UP\n")
             Y = Y - self.snake_dy
 
-        elif(Ai_move == Game_M.Direction[2]):
+        elif(Ai_move == Game_M.Direction[2] and GM.LastKeypressed != 3):#LEFT
+            last_mov = 2
+            #print("LEFT")
             X = X - self.snake_dx
-
+        else:
+            if(Game_M.Direction[0] == Game_M.Direction[GM.LastKeypressed]):
+                last_mov = 0
+                #print("UP\n")
+                Y = Y - self.snake_dy
+            elif(Game_M.Direction[1] == Game_M.Direction[GM.LastKeypressed]):
+                last_mov = 1
+                #print("DOWN\n")
+                Y = Y + self.snake_dy
+            elif(Game_M.Direction[2] == Game_M.Direction[GM.LastKeypressed]):
+                last_mov = 2
+                #print("LEFT")
+                X = X - self.snake_dx
+            elif(Game_M.Direction[3] == Game_M.Direction[GM.LastKeypressed]):
+                last_mov = 3
+                #print("RIGHT\n")
+                X = X + self.snake_dx
         C = Collisions.Collisions()
         if(C.Check_Ai(X,Y,G)):
             GM.P_Lose()
             return False
-        
+        GM.Set_LastkeyPressed(last_mov)
         GM.Enter_snakeCell(X,Y,self.Get_picture())
 
     
