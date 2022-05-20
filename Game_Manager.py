@@ -4,8 +4,8 @@ import pygame, Score, Snake,Global_Var as Global, Apple
 
 UP = (-1, 0)
 DOWN = (1, 0)
-RIGHT = (0, -1)
-LEFT = (0, 1)
+RIGHT = (0, 1)
+LEFT = (0, -1)
 
 
 Direction = [UP,DOWN, LEFT, RIGHT] 
@@ -19,8 +19,8 @@ class Game_Manager:
         self.Run = True
         self.clock = pygame.time.Clock()
         self.FPS = 300
-        self.WIDTH = 373
-        self.HEIGHT = 500
+        self.WIDTH = 310
+        self.HEIGHT = 376
         self.Lose = False
         self.Win = False 
         self.Losing_text = "Game Over"
@@ -28,37 +28,17 @@ class Game_Manager:
         self.snake_pic = "Snake_ai Pic\SnakeBodyRight.png"
         self.game_icon = "Snake_ai Pic\SnakeIcon.png"
         self.title = 'Snake AI'
-        self.Apple = Apple.Apple()
-        self.Apple.__init__()
+        self.Apple = None
         self.GameScore = Score.Score()
         self.GameScore.__init__()
         self.G = Global.Global()
         self.G.__init__()
         self.StartX = 3
         self.StartY = 6
-        self.LastKeypressed = Direction[3]
+        self.LastKeypressed = 3
         self.frame_iteration = 0
         self.move_count = 0
         self.Ai = None
-    
-    def reset(self):
-        self.Apple = Apple.Apple()
-        self.Apple.__init__()
-        self.GameScore = Score.Score()
-        self.GameScore.__init__()
-        self.G = Global.Global()
-        self.G.__init__()
-        self.StartX = 3
-        self.StartY = 6
-        self.LastKeypressed = Direction[3]
-        self.Lose = False
-        self.Win = False 
-        self.Run = True
-        self.frame_iteration = 0
-        self.move_count = 0
-        self.Ai = None
-
-
 
     
     def CreateWIN(self):
@@ -73,10 +53,23 @@ class Game_Manager:
         #for event in pygame.event.get():
         #    if event.type == pygame.QUIT:
         #        self.Run = False
-        Ai_move = self.Ai.get_move(self.G.Get_Board_mat(), self.G.Get_head())
+        Ai_move = self.Ai.get_move(self.G.Get_Board_mat(), self.G.Get_head(), self.LastKeypressed)
         self.move_count += 1
         Head = self.G.Get_head()
         Head.Change_pos(self.G,Ai_move, self)
+
+        if(not self.Apple.Apple_Exist(self.G)):
+            self.GameScore.Update_Score()
+            self.Check_win()
+            self.move_count = 0
+            Board = self.G.Get_Board_mat()
+            print(self.Apple.Get_pos())
+            self.G.Update_SnakeLength()
+            if(self.Check_win()):
+                return
+            self.Apple.Get_apple(self.G)
+        else:
+            self.G.Remove_tail()
 
 
     def Enter_snakeCell(self,x,y,picture):
@@ -97,21 +90,11 @@ class Game_Manager:
 
 
     def Draw_Game(self):
-        #self.screen.blit(self.Board,(0,66))
-        if(not self.Apple.Apple_Exist(self.G)):
-            self.GameScore.Update_Score()
-            self.Check_win()
-            self.move_count = 0
-            self.G.Update_SnakeLength()
-            if(self.Check_win()):
-                return
-            self.Apple.Random_place(self.G)
-        else:
-            self.G.Remove_tail()
-            #self.Apple.Draw_Apple(self.screen)
+        self.screen.blit(self.Board,(0,66))
+        self.Apple.Draw_Apple(self.screen)
         #self.Update_Snake_pos()
-        #self.Draw_Snake()
-        #self.GameScore.Draw_score(self.screen)
+        self.Draw_Snake()
+        self.GameScore.Draw_score(self.screen)
 
     def Check_win(self):
         #Cheking if the Snake legnth equal to the Board size
@@ -142,10 +125,12 @@ class Game_Manager:
     def Frame_lived(self):
         return self.frame_iteration
 
-    def Snake_Game(self, move_lim, AI):
+    def Snake_Game(self, move_lim, AI, Apples):
+        self.Apple = Apples
         self.Ai = AI
         #self.CreateWIN()
         self.Create_Snake()
+        self.Apple.Get_apple(self.G)
         while(self.Run):
             if(move_lim > self.move_count):      
                 if(self.Lose == False):
@@ -153,13 +138,14 @@ class Game_Manager:
                     self.clock.tick(self.FPS)
                     self.frame_iteration += 1
                     self.Check_events()
-                    self.Draw_Game()
+                    #self.Draw_Game()
                 else:
                     break
                 #pygame.display.update()
             else:
                 break
-        pygame.quit()
+        #pygame.quit()
+        #print(self.G.Get_head().Get_snakeY(), " , ", self.G.Get_head().Get_snakeX())
         if(self.Win):
             return -10
         return move_lim-self.move_count

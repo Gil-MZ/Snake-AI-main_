@@ -1,73 +1,12 @@
 from collections import deque as queue
+from Apple import Apple
 import Game_Manager as Game_M
 import numpy, random, math
- 
-# Direction vectors
-dRow = [ -1, 0, 1, 0]
-dCol = [ 0, 1, 0, -1]
- 
-# Function to check if a cell
-# is be visited or not
-def isValid(vis, row, col):
-   
-    # If cell lies out of bounds
-    if (row < 0 or col < 0 or row >= 4 or col >= 4):
-        return False
- 
-    # If cell is already visited
-    if (vis[row][col]):
-        return False
- 
-    # Otherwise
-    return True
- 
-# Function to perform the BFS traversal
-def BFS(grid, vis, row, col):
-   
-    # Stores indices of the matrix cells
-    q = queue()
- 
-    # Mark the starting cell as visited
-    # and push it into the queue
-    q.append(( row, col ))
-    vis[row][col] = True
- 
-    # Iterate while the queue
-    # is not empty
-    while (len(q) > 0):
-        cell = q.popleft()
-        x = cell[0]
-        y = cell[1]
-        print(grid[x][y], end = " ")
- 
-        #q.pop()
- 
-        # Go to the adjacent cells
-        for i in range(4):
-            adjx = x + dRow[i]
-            adjy = y + dCol[i]
-            if (isValid(vis, adjx, adjy)):
-                q.append((adjx, adjy))
-                vis[adjx][adjy] = True
- 
-# Driver Code
-if __name__ == '__main__':
-   
-    # Given input matrix
-    grid= [ [ 1, 2, 3, 4 ],
-           [ 5, 6, 7, 8 ],
-           [ 9, 10, 11, 12 ],
-           [ 13, 14, 15, 16 ] ]
- 
-    # Declare the visited array
-    vis = [[ False for i in range(4)] for i in range(4)]
-    # vis, False, sizeof vis)
- 
-    BFS(grid, vis, 0, 0)
+
 
 class Snkae_AI:
 
-    def __init__(self, pop_size, num_generations, num_trails, window_size, hidden_size, board_sizeX, board_sizeY, mutation_chance = 0.2, mutation_size = 0.02):
+    def __init__(self, pop_size, num_generations, num_trails, window_size, hidden_size, board_sizeX, board_sizeY, mutation_chance, mutation_size):
         self.pop_size = pop_size
         self.num_generations = num_generations
         self.num_trails = num_trails
@@ -82,6 +21,11 @@ class Snkae_AI:
 
         self.current_brain = None
 
+        self.ap = Apple()
+        self.ap.Apples_Place()
+        self.game = None
+        self.gen = None
+
         self.pop = [self.generate_brain(self.window_size**2, self.hidden_size, len(Game_M.Direction)) for _ in range(self.pop_size)]
 
     def generate_brain(self,input_size, hidden_size, output_size):
@@ -91,7 +35,8 @@ class Snkae_AI:
 
         return [hidden_layer1, hidden_layer2, output_layer]
 
-    def get_move(self,board, snake):
+    def get_move(self,board, snake, last_move):
+        second_index = -1
         input_vector = self.proccess_board(board, snake.Get_snakeX(), snake.Get_snakeY())
         hidden_layer1 = self.current_brain[0]
         hidden_layer2 = self.current_brain[1]
@@ -104,18 +49,147 @@ class Snkae_AI:
         output_result = numpy.array([numpy.dot(hidden_result2, output_layer[i]) for i in range (output_layer.shape[0])])
 
         max_index = numpy.argmax(output_result)
+        man_index = self.possible_moves(snake.Get_snakeX(), snake.Get_snakeY())
+        second_index = self.Second_max(max_index, output_result)
+        #print(max_index, " , ", second_index)
+        if((max_index == 0 and last_move == 1) or (max_index == 1 and last_move == 0) or (max_index == 2 and last_move == 3) or (max_index == 3 and last_move == 2)):
+            max_index = second_index
+        
+        if(self.gen < 50 and output_result[max_index] - output_result[second_index] > 0.3):
+            max_index = man_index
+        else:
+            if(second_index == max_index):
+                max_index = man_index
         return Game_M.Direction[max_index]
+    
+    def Second_max(self, max_index, output_result):
+        if(max_index > 0):
+            second_max_index = max_index - 1 
+        else:
+            second_max_index = max_index + 1
+        for x in range (len(Game_M.Direction)):
+            if(x != max_index):
+                if(output_result[second_max_index] < output_result[x]):
+                    second_max_index = x
+        return second_max_index
+
+    def manhattan_distance(self, x_head, y_head):
+        #checks the distance between the snake's head coordinates and the apple's
+        board = self.game.G.Get_Board_mat()
+        if(x_head < 0 or x_head >= self.board_sizeX or y_head < 0 or y_head >= self.board_sizeY):
+            return -1
+        if(board[x_head][y_head] == 1):
+            return -1
+        arr_apple = self.ap.Apple_Places
+        curr_apple = self.ap.current_apple
+        return abs(arr_apple[curr_apple][0] - x_head) + abs(arr_apple[curr_apple][1] - y_head)
+                
+    def isValid(self, vis, x, y):
+        board = self.game.G.Get_Board_mat()
+        # If cell lies out of bounds or it's the snake's body
+        if(x < 0 or x >= self.board_sizeX or y < 0 or y >= self.board_sizeY):
+            return False
+        if (board[x][y] == 1):
+            return False
+    
+        # If cell is already visited
+        if (vis[x][y]):
+            return False
+    
+        # Otherwise
+        return True
+ 
+    # Function to perform the BFS traversal
+    def open_spaces(self, x_head, y_head):
+        possible_moves = 0
+        board = self.game.G.Get_Board_mat()
+        vis = [[False for _ in range(self.board_sizeX)] for _ in range (self.board_sizeY)]
+        # Stores indices of the matrix cells
+        q = queue()
+
+        if(x_head < 0 or x_head >= self.board_sizeX or y_head < 0 or y_head >= self.board_sizeY):
+            return -1
+        if(board[x_head][y_head] == 1):
+            return -1
+        #Using BFS to check the number of open spaces from the snake's head coordinates
+    
+        # Mark the starting cell as visited
+        # and push it into the queue
+        q.append((x_head, y_head))
+        vis[x_head][y_head] = True
+    
+        # Iterate while the queue
+        # is not empty
+        while (len(q) > 0):
+            cell = q.popleft()
+            x = cell[0]
+            y = cell[1]    
+            #q.pop()
+            # Go to the adjacent cells
+            adjx = x
+            adjy = y
+            if (self.isValid(vis, adjx+1, adjy)):
+                q.append((adjx+1, adjy))
+                vis[adjx+1][adjy] = True
+                possible_moves += 1
+
+            if (self.isValid(vis, adjx, adjy+1)):
+                q.append((adjx, adjy+1))
+                vis[adjx][adjy+1] = True
+                possible_moves += 1
+            
+            if (self.isValid(vis, adjx-1, adjy)):
+                q.append((adjx-1, adjy))
+                vis[adjx-1][adjy] = True
+                possible_moves += 1
+
+            if (self.isValid(vis, adjx, adjy-1)):
+                q.append((adjx, adjy-1))
+                vis[adjx][adjy-1] = True
+                possible_moves += 1
+        return possible_moves
+
+    def possible_moves(self, x_head, y_head):
+        #Checks which path is possible and shortest
+        man_dis = []
+        if(self.open_spaces(x_head-1, y_head) > self.game.G.Get_SnakeLength()):#LEFT
+            man_dis.append((self.manhattan_distance(x_head-1, y_head), 2))
+
+        if(self.open_spaces(x_head+1, y_head)> self.game.G.Get_SnakeLength()):#RIGHT
+            man_dis.append((self.manhattan_distance(x_head+1, y_head), 3))
+
+        if(self.open_spaces(x_head, y_head-1)> self.game.G.Get_SnakeLength()):#UP
+            man_dis.append((self.manhattan_distance(x_head, y_head-1), 0))
+
+        if(self.open_spaces(x_head, y_head+1)> self.game.G.Get_SnakeLength()):#DOWN
+            man_dis.append((self.manhattan_distance(x_head, y_head+1), 1))
+
+        if(len(man_dis) == 0):
+            man_dis.append((self.manhattan_distance(x_head-1, y_head), 2))
+            man_dis.append((self.manhattan_distance(x_head+1, y_head), 3))
+            man_dis.append((self.manhattan_distance(x_head, y_head-1), 0))
+            man_dis.append((self.manhattan_distance(x_head, y_head+1), 1))
+        min_dis = 1000
+        for x in range (len(man_dis)):
+            dis = man_dis[x][0]
+            if(dis < min_dis):
+                min_dis = man_dis[x][0]
+                min_x = man_dis[x][1]
+        
+        return min_x
+                
 
     def proccess_board(self, board, x1, y1):
+        #according to the board the function gives the input vector
         # x and y are the snake positions
         input_vector = [[0 for _ in range (self.window_size)] for _ in range (self.window_size)]
 
         for i in range(self.window_size):
             for j in range(self.window_size):
-                ii = x1 + i - self.window_size//2
-                jj = y1 + j - self.window_size//2
+                ii = x1 + i 
+                jj = y1 + j 
                 #checkes if new positions are out of bounds
-                if (ii < 0 or jj < 0 or ii >= self.board_sizeY or jj >= self.board_sizeX):
+                if (ii < 0 or jj < 0 or ii >= self.board_sizeX or jj >= self.board_sizeY):
                     input_vector[i][j] = -1
                 elif (board[ii][jj] == 2): # apple number
                     input_vector[i][j] = 1
@@ -152,28 +226,31 @@ class Snkae_AI:
             new_brain.append(new_layer)
         return new_brain
     
-    def one_generation(self):
+    def one_generation(self, gen):
         scores = [0 for _ in range(self.pop_size)]
-        snake_length = [0 for _ in range(self.pop_size)]
         max_score = 0
 
         for i in range (self.pop_size):
             for j in range (self.num_trails):
                 self.current_brain = self.pop[i]
-                game = Game_M.Game_Manager()
-                outcome = game.Snake_Game(150, self)
-                score = game.G.Get_SnakeLength()
+                self.game = Game_M.Game_Manager()
+                outcome = self.game.Snake_Game(300, self,self.ap)
+                score = self.game.G.Get_SnakeLength()
+                frames = self.game.Frame_lived()
+                self.ap.reset()
                 #frames = game.Frame_lived()
-                #score = pow(length-1,3)*(frames)
-                scores[i] += score
                 #snake_length[i] += length
+                scores[i] += score
                 if(outcome == 0):
+                    score -= 2
                     print("snake ", i , " made it to last turn")
                 elif(outcome == -10):
+                    score+=10
                     print("snake ", i , " Won the game!")
-                if(max_score < score):
+                if(max_score <= score):
                     max_score = score
                     print(max_score, " snake ID ", i)
+                print("-------------------------------------------")
         top_25_indexes = list(numpy.argsort(scores))[3*(self.pop_size//4):self.pop_size]
         #print(snake_length, "\n")
         #print(scores, "\n\n\n")
@@ -184,7 +261,8 @@ class Snkae_AI:
 
     def evolve_pop(self):
         for i in range (self.num_generations):
-            self.one_generation()
+            self.gen = i
+            self.one_generation(i)
             print("gen: ", i)
         
         key = input("Enter any key to end")
