@@ -1,6 +1,4 @@
 import pygame, Global_Var as Global, random
-from pyparsing import one_of
-from torch import ThroughputBenchmark
 
 class Apple:
 

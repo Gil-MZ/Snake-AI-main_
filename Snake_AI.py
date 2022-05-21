@@ -151,6 +151,7 @@ class Snkae_AI:
 
     def possible_moves(self, x_head, y_head):
         #Checks which path is possible and shortest
+        min_x = -1
         man_dis = []
         if(self.open_spaces(x_head-1, y_head) > self.game.G.Get_SnakeLength()):#LEFT
             man_dis.append((self.manhattan_distance(x_head-1, y_head), 2))
@@ -169,12 +170,19 @@ class Snkae_AI:
             man_dis.append((self.manhattan_distance(x_head+1, y_head), 3))
             man_dis.append((self.manhattan_distance(x_head, y_head-1), 0))
             man_dis.append((self.manhattan_distance(x_head, y_head+1), 1))
-        min_dis = 1000
-        for x in range (len(man_dis)):
-            dis = man_dis[x][0]
-            if(dis < min_dis):
-                min_dis = man_dis[x][0]
-                min_x = man_dis[x][1]
+            max_dis = -1
+            for x in range (len(man_dis)):
+                dis = man_dis[x][0]
+                if(dis > max_dis):
+                    max_dis = man_dis[x][0]
+                    min_x = man_dis[x][1]
+        else:
+            min_dis = 1000
+            for x in range (len(man_dis)):
+                dis = man_dis[x][0]
+                if(dis < min_dis):
+                    min_dis = man_dis[x][0]
+                    min_x = man_dis[x][1]
         
         return min_x
                 
@@ -226,7 +234,7 @@ class Snkae_AI:
             new_brain.append(new_layer)
         return new_brain
     
-    def one_generation(self, gen):
+    def one_generation(self):
         scores = [0 for _ in range(self.pop_size)]
         max_score = 0
 
@@ -236,17 +244,16 @@ class Snkae_AI:
                 self.game = Game_M.Game_Manager()
                 outcome = self.game.Snake_Game(300, self,self.ap)
                 score = self.game.G.Get_SnakeLength()
-                frames = self.game.Frame_lived()
                 self.ap.reset()
                 #frames = game.Frame_lived()
                 #snake_length[i] += length
-                scores[i] += score
                 if(outcome == 0):
                     score -= 2
                     print("snake ", i , " made it to last turn")
                 elif(outcome == -10):
                     score+=10
                     print("snake ", i , " Won the game!")
+                scores[i] += score
                 if(max_score <= score):
                     max_score = score
                     print(max_score, " snake ID ", i)
@@ -258,12 +265,16 @@ class Snkae_AI:
         print(scores)
         top_25 = [self.pop[i] for i in top_25_indexes[::-1]]
         self.pop = self.reproduce(top_25)
+        return max_score
 
     def evolve_pop(self):
+        max_scores = []
         for i in range (self.num_generations):
             self.gen = i
-            self.one_generation(i)
+            max_scores.insert(0,self.one_generation())
             print("gen: ", i)
+            print("Max Scores in every gen: ", max_scores)
+
         
         key = input("Enter any key to end")
         

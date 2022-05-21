@@ -1,5 +1,5 @@
 import pygame, Global_Var as Global
-import numpy, Collisions
+import Collisions
 import Game_Manager as Game_M
 
 class Snake:    
@@ -13,10 +13,6 @@ class Snake:
         self.snake_dy = 1
 
 #Get functions    
-
-    def Get_type(self):
-        return type(Snake)
-
     def Get_snakeX(self):
         #returning the snake X
         return self.snake_X
@@ -41,9 +37,6 @@ class Snake:
 
     def Set_picture(self, picture):
         self.picture = picture
-    
-    def Set_pervPic(self, picture):
-        self.prevPic = picture
 
     
     def Draw_Cell(self, screen: pygame.Surface):

@@ -1,6 +1,5 @@
 from pip import main
 import Game_Manager as Game
-from collections import deque
 
 from Snake_AI import Snkae_AI
 

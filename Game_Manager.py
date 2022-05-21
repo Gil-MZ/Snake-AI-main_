@@ -1,6 +1,4 @@
-from collections import namedtuple
-import enum
-import pygame, Score, Snake,Global_Var as Global, Apple
+import pygame, Score, Snake,Global_Var as Global
 
 UP = (-1, 0)
 DOWN = (1, 0)
@@ -10,7 +8,6 @@ LEFT = (0, -1)
 
 Direction = [UP,DOWN, LEFT, RIGHT] 
 
-Ai_point = namedtuple('point', 'x, y')
 
 class Game_Manager:
 
