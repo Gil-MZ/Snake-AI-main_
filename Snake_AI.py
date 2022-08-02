@@ -224,6 +224,7 @@ class Snkae_AI:
         return new_pop
     
     def mutate(self, brain):
+        #mutates the barin the function was given
         new_brain = []
         for layer in brain:
             new_layer = numpy.copy(layer)
@@ -235,6 +236,7 @@ class Snkae_AI:
         return new_brain
     
     def one_generation(self):
+        #runs the current generation
         scores = [0 for _ in range(self.pop_size)]
         max_score = 0
 
@@ -268,6 +270,7 @@ class Snkae_AI:
         return max_score
 
     def evolve_pop(self):
+        #The Ai loop, run on the number of generations given to him.
         max_scores = []
         for i in range (self.num_generations):
             self.gen = i
