@@ -42,8 +42,6 @@ class Snkae_AI:
         hidden_layer2 = self.current_brain[1]
         output_layer = self.current_brain[2]
 
-#        print(input_vector)
-#        print(hidden_layer1[0])
         hidden_result1 = numpy.array([math.tanh(numpy.dot(input_vector, hidden_layer1[i])) for i in range (hidden_layer1.shape[0])] + [1])
         hidden_result2 = numpy.array([math.tanh(numpy.dot(hidden_result1, hidden_layer2[i])) for i in range (hidden_layer2.shape[0])] + [1])
         output_result = numpy.array([numpy.dot(hidden_result2, output_layer[i]) for i in range (output_layer.shape[0])])
@@ -51,7 +49,6 @@ class Snkae_AI:
         max_index = numpy.argmax(output_result)
         man_index = self.possible_moves(snake.Get_snakeX(), snake.Get_snakeY())
         second_index = self.Second_max(max_index, output_result)
-        #print(max_index, " , ", second_index)
         if((max_index == 0 and last_move == 1) or (max_index == 1 and last_move == 0) or (max_index == 2 and last_move == 3) or (max_index == 3 and last_move == 2)):
             max_index = second_index
         
@@ -124,7 +121,6 @@ class Snkae_AI:
             cell = q.popleft()
             x = cell[0]
             y = cell[1]    
-            #q.pop()
             # Go to the adjacent cells
             adjx = x
             adjy = y
@@ -261,8 +257,6 @@ class Snkae_AI:
                     print(max_score, " snake ID ", i)
                 print("-------------------------------------------")
         top_25_indexes = list(numpy.argsort(scores))[3*(self.pop_size//4):self.pop_size]
-        #print(snake_length, "\n")
-        #print(scores, "\n\n\n")
         scores.sort(reverse=True)
         print(scores)
         top_25 = [self.pop[i] for i in top_25_indexes[::-1]]
